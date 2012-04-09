@@ -16,8 +16,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-include_recipe "apache2"
-include_recipe "apt"
 
 if node.has_key?("ec2")
   server_fqdn = node['ec2']['public_hostname']
@@ -25,29 +23,22 @@ else
   server_fqdn = node['fqdn']
 end
 
-apt_repository "sourcefabric" do
-  uri "http://apt.sourcefabric.org/"
-  distribution node['lsb']['codename']
-  components ["main"]
+log "Cache path: #{Chef::Config[:file_cache_path]}" do
+  action :nothing
 end
 
-package "sourcefabric-keyring" do
-  action :install
-  options "-f --force-yes"
+remote_file "#{Chef::Config[:file_cache_path]}/airtime-2.1.0-beta3.tar.gz" do
+  source "http://downloads.sourceforge.net/project/airtime/2.1.0-beta3/airtime-2.1.0-beta3.tar.gz"
+  mode "0644"
+end
+execute "untar-airtime" do
+  cwd Chef::Config[:file_cache_path]
+  command "tar -xzf #{Chef::Config[:file_cache_path]}/airtime-2.1.0-beta3.tar.gz"
+end
+execute "install-airtime" do
+  command "sudo #{Chef::Config[:file_cache_path]}/airtime-*/install_full/ubuntu/airtime-full-install"
 end
 
-package "airtime" do
-  action :install
-  options "-f --force-yes"
-end
-
-apache_site "000-default" do
-  enable false
-end
-execute "watch-music-folder" do
-  command "sudo airtime-import watch add /vagrant/music"
-end
-
-log "Navigate to 'http://admin:admin@#{server_fqdn} to begin using Airtime User: admin Password: admin" do
+log "Navigate to 'http://admin:admin@#{server_fqdn} to begin using Airtime. Login using User: admin Password: admin" do
   action :nothing
 end

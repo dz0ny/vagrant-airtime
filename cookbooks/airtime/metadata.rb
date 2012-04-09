@@ -7,6 +7,6 @@ version          "1.0.0"
 
 recipe "airtime", "Installs Airtime"
 
-%w{ centos redhat scientific suse fedora ubuntu debian }.each do |os|
+%w{ ubuntu debian }.each do |os|
   supports os
 end
