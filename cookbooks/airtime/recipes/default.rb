@@ -27,6 +27,15 @@ log "Cache path: #{Chef::Config[:file_cache_path]}" do
   action :nothing
 end
 
+remote_file "#{Chef::Config[:file_cache_path]}/airtime-2.1-oneiric-fix.sh" do
+  source "https://raw.github.com/gist/2343716/dd13f1490112a51147957e3ebc4d49179f6f185e/airtime-2.1-oneiric-fix.sh"
+  mode "0644"
+end
+
+execute "prepare-airtime" do
+  command "bash #{Chef::Config[:file_cache_path]}/airtime-2.1-oneiric-fix.sh"
+end
+
 remote_file "#{Chef::Config[:file_cache_path]}/airtime-2.1.0-beta3.tar.gz" do
   source "http://downloads.sourceforge.net/project/airtime/2.1.0-beta3/airtime-2.1.0-beta3.tar.gz"
   mode "0644"

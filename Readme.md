@@ -1,6 +1,6 @@
 # Vagrant Airtime #
 
-This is a [Vagrant][vagrant] setup for testing [Airtime][airtime] internet radio playout/automation software. Uses
+This is a [Vagrant][vagrant] setup for testing [Airtime][airtime] 2.1-beta3 internet radio playout/automation software. Uses
 [Chef Solo][chef] recipes for provisioning. The recipes are copied from [those by Opscode][cookbooks-opscode], which
 allows for their use with Chef Solo.
 
@@ -14,6 +14,7 @@ allows for their use with Chef Solo.
 
     $ git clone git://github.com/dz0ny/vagrant-airtime.git
     $ cd vagrant-airtime
+    $ branch dev
     $ vagrant up
     $ open http://[node:fqdn] and login using admin:admin
 
