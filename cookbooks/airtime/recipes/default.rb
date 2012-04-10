@@ -43,6 +43,12 @@ execute "clone-airtime-dev" do
   not_if "test -f /opt/airtime/devel/README"
 end
 
+remote_file "/opt/airtime/devel/python_apps/pypo/liquidsoap_bin/liquidsoap_oneiric_amd64" do
+  source "https://github.com/downloads/dz0ny/vagrant-airtime/liquidsoap_oneiric_amd64"
+  mode "755"
+  not_if "test -f /opt/devel/python_apps/pypo/liquidsoap_bin/liquidsoap_oneiric_amd64"
+end
+
 execute "install-airtime" do
   command "sudo /opt/airtime/devel/install_full/ubuntu/airtime-full-install"
   not_if "test -f /etc/airtime/airtime.conf"
