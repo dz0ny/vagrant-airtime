@@ -12,9 +12,8 @@ allows for their use with Chef Solo.
 
 ## To get started ##
 
-    $ git clone git://github.com/dz0ny/vagrant-airtime.git
+    $ git clone -b dev git://github.com/dz0ny/vagrant-airtime.git
     $ cd vagrant-airtime
-    $ branch dev
     $ vagrant up
     $ open http://[node:fqdn] and login using admin:admin
 

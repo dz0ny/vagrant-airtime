@@ -17,35 +17,35 @@
 # limitations under the License.
 #
 
+#Only install under debian, ubuntu
+
+package "git-core"
 if node.has_key?("ec2")
   server_fqdn = node['ec2']['public_hostname']
 else
   server_fqdn = node['fqdn']
 end
 
-log "Cache path: #{Chef::Config[:file_cache_path]}" do
-  action :nothing
-end
-
 remote_file "#{Chef::Config[:file_cache_path]}/airtime-2.1-oneiric-fix.sh" do
   source "https://raw.github.com/gist/2343716/dd13f1490112a51147957e3ebc4d49179f6f185e/airtime-2.1-oneiric-fix.sh"
   mode "0644"
+  not_if "test -f /etc/airtime/airtime.conf"
 end
 
 execute "prepare-airtime" do
   command "bash #{Chef::Config[:file_cache_path]}/airtime-2.1-oneiric-fix.sh"
+  not_if "test -f /etc/airtime/airtime.conf"
 end
 
-remote_file "#{Chef::Config[:file_cache_path]}/airtime-2.1.0-beta3.tar.gz" do
-  source "http://downloads.sourceforge.net/project/airtime/2.1.0-beta3/airtime-2.1.0-beta3.tar.gz"
-  mode "0644"
+execute "clone-airtime-dev" do
+  cwd "/opt"
+  command "sudo git clone -b devel git://github.com/sourcefabric/Airtime.git airtime/devel"
+  not_if "test -f /opt/airtime/devel/README"
 end
-execute "untar-airtime" do
-  cwd Chef::Config[:file_cache_path]
-  command "tar -xzf #{Chef::Config[:file_cache_path]}/airtime-2.1.0-beta3.tar.gz"
-end
+
 execute "install-airtime" do
-  command "sudo #{Chef::Config[:file_cache_path]}/airtime-*/install_full/ubuntu/airtime-full-install"
+  command "sudo /opt/airtime/devel/install_full/ubuntu/airtime-full-install"
+  not_if "test -f /etc/airtime/airtime.conf"
 end
 
 log "Navigate to 'http://admin:admin@#{server_fqdn} to begin using Airtime. Login using User: admin Password: admin" do

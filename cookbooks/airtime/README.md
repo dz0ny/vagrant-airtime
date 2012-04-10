@@ -6,7 +6,7 @@ Installs Airtime
 Requirements
 ====
 
-Debian, Ubuntu, CentOS, Red Hat, Scientific, Fedora, SUSE.
+Debian, Ubuntu
 
 License and Author
 ====
