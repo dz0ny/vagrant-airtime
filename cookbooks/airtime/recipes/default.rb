@@ -20,6 +20,21 @@
 #Only install under debian, ubuntu
 
 package "git-core"
+
+#nginx service
+service "nginx" do
+  supports :restart => true
+  action [ :enable, :start ]
+  ignore_failure true
+end
+
+#php5-fpm
+service "php5-fpm" do
+  supports :restart => true
+  action [ :enable, :start ]
+  ignore_failure true
+end
+
 if node.has_key?("ec2")
   server_fqdn = node['ec2']['public_hostname']
 else
@@ -29,7 +44,7 @@ end
 remote_file "#{Chef::Config[:file_cache_path]}/airtime-2.1-oneiric-fix.sh" do
   source "https://raw.github.com/gist/2343716/dd13f1490112a51147957e3ebc4d49179f6f185e/airtime-2.1-oneiric-fix.sh"
   mode "0644"
-  not_if "test -f /etc/airtime/airtime.conf"
+  not_if {File.exists?("/etc/airtime/airtime.conf")}
 end
 
 execute "prepare-airtime" do
@@ -40,20 +55,45 @@ end
 execute "clone-airtime-dev" do
   cwd "/opt"
   command "sudo git clone -b devel git://github.com/sourcefabric/Airtime.git airtime/devel"
-  not_if "test -f /opt/airtime/devel/README"
+  not_if {File.exists?("/opt/airtime/devel/README")}
 end
 
 remote_file "/opt/airtime/devel/python_apps/pypo/liquidsoap_bin/liquidsoap_oneiric_amd64" do
-  source "https://github.com/downloads/dz0ny/vagrant-airtime/liquidsoap_oneiric_amd64"
+  source "http://github.com/downloads/dz0ny/vagrant-airtime/liquidsoap_oneiric_amd64"
   mode "755"
-  not_if "test -f /opt/devel/python_apps/pypo/liquidsoap_bin/liquidsoap_oneiric_amd64"
+  not_if {File.exists?("/opt/devel/python_apps/pypo/liquidsoap_bin/liquidsoap_oneiric_amd64")}
 end
 
 execute "install-airtime" do
-  command "sudo /opt/airtime/devel/install_full/ubuntu/airtime-full-install"
-  not_if "test -f /etc/airtime/airtime.conf"
+  command "sudo /opt/airtime/devel/install_full/ubuntu/airtime-full-install-nginx"
+  not_if {File.exists?("/etc/airtime/airtime.conf")}
+  ignore_failure true
 end
 
-log "Navigate to 'http://admin:admin@#{server_fqdn} to begin using Airtime. Login using User: admin Password: admin" do
+#remove isntalled directory and link git directory to server directory
+directory "/usr/share/airtime" do
+  recursive true
+  action :delete
+  not_if "test -L /usr/share/airtime"
+end
+
+link "/usr/share/airtime" do
+  to "/opt/airtime/devel/airtime_mvc"
+  not_if "test -L /usr/share/airtime"
+end
+
+##disable defaults
+file "/etc/nginx/sites-enabled/default" do
+  action :delete
+  only_if {File.exists?("/etc/nginx/sites-enabled/default")}
+  notifies :restart, "service[nginx]"
+end
+file "/etc/php5/fpm/pool.d/www.conf" do
+  action :delete
+  only_if {File.exists?("/etc/php5/fpm/pool.d/www.conf")}
+  notifies :restart, "service[php5-fpm]"
+end
+
+log "Navigate to 'http://#{server_fqdn} to begin using Airtime. Login using User: admin Password: admin" do
   action :nothing
 end
